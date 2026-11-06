@@ -1,0 +1,12 @@
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{s24061905}
+Dirgová~Luptáková, I., Kubovčík, M., Pospíchal, J.: Playing flappy bird based on motion recognition using a transformer model and lidar sensor. Sensors  \textbf{24}(6) (2024). \doi{10.3390/s24061905}, \url{https://www.mdpi.com/1424-8220/24/6/1905}
+
+\bibitem{towers2024gymnasiumstandardinterfacereinforcement}
+Towers, M., Kwiatkowski, A., Terry, J., Balis, J.U., Cola, G.D., Deleu, T., Goulão, M., Kallinteris, A., Krimmel, M., KG, A., Perez-Vicente, R., Pierré, A., Schulhoff, S., Tai, J.J., Tan, H., Younis, O.G.: Gymnasium: A standard interface for reinforcement learning environments (2024), \url{https://arxiv.org/abs/2407.17032}
+
+\end{thebibliography}

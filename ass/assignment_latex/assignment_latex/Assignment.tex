@@ -1,0 +1,125 @@
+% This is a paper template using the LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+%
+% A lot of package loading
+\usepackage[pdftex]{graphicx}
+\usepackage{geometry}
+\usepackage[cmex10]{amsmath}
+\usepackage{array, algpseudocode}
+\usepackage{amsmath, amssymb, amsfonts, parskip, graphicx, verbatim}
+\usepackage{url, hyperref}
+\usepackage{bm, rotating, adjustbox, latexsym}
+\usepackage{tabularx, booktabs}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\usepackage{float, setspace, mdframed}
+\usepackage{color, contour, placeins, subfig, cite}
+\usepackage[mathscr]{euscript}
+\usepackage[osf]{mathpazo}
+\usepackage{pgf, tikz, microtype, algorithm}
+\usetikzlibrary{shapes,backgrounds,calc,arrows}
+\usepackage{xcolor, colortbl, dsfont}
+\usepackage{xspace,soul}
+
+\begin{document}
+%
+\title{NaCo 26/27 assignment report}
+
+\author{First and last name of each student in the group}
+%
+\authorrunning{NaCo 26/27}
+
+\institute{Group number $999$}
+%
+\maketitle % typeset the header of the contribution
+%
+
+\begin{abstract}
+This document contains the instructions and the format for the report required for submission of the practical assignment for the course Natural Computing. 
+\end{abstract}
+
+\section{Introduction}
+This document serves as a \textit{description of the practical assignment} for the course Natural Computing in the academic year 2026/2027.
+In this assignment, you will work with Random Search (RS), Differential Evolution (DE) and Particle Swarm Optimisation (PSO) for continuous black blox optimisation.
+
+You will be asked to provide the following:
+\begin{itemize}
+    \item An implementation of RS as a baseline optimiser on the Flappy Bird problem (see section \ref{sect:descr}).
+    \item An implementation of DE and PSO to find working solutions, and an experimental setup to invesigate different solution dimensionality and problem difficulty (see section \ref{sect:descr}).
+\end{itemize}
+
+To help structure your report, we provide a \textit{brief report outline} in this document. \textbf{Please complete the following sections with your own results, explanations and conclusions. Do not forget to update the abstract and this introduction.} Alongside this document in \texttt{prolem.py}, you will find an implementation of the flappy bird problem with an example on how to sample and visualise a candidate solution.
+
+In this section: introduce what the paper is about and provide a background to any relevant literature (using proper citations, e.g. ~\cite{towers2024gymnasiumstandardinterfacereinforcement}).
+
+\section{Problem Description}\label{sect:descr}
+
+\subsection{Flappy Bird}\label{sect:LL}
+In this problem, we are trying to find the best parameters to achieve the highest score possible on the famous flappy bird game. In this modified version of the game by \cite{s24061905} (built on top of the gymnasium library \cite{towers2024gymnasiumstandardinterfacereinforcement}), at each simulation step, the game returns the current state of the simulation $s$ and expects to receive an action $a$ to take. To make this problem more or less challenging, the vertical distance between the pipes can be adjsted using the \texttt{pipe\_gap} parameter of the problem generator. Since it can have a large impact on the quality of the solutions found, make sure to specify the simulation setup when reporting performance and explore various gap values.
+
+\subsection{State vector}
+In this modified version of the game, at each simulation step, the simulator returns a state $s$ vector that describes the current state of the simulation. There are two options for this state:
+\begin{itemize}
+    \item \textbf{Option 1: Descriptive features of the simulation}. In this setup, we obtain, at each step, a vector of 12 features describing properties such as: player's vertical velocity, player's vertical position, next pipe's horizontal location, ... The default setup of the problem class uses this state reading technique.
+    \item \textbf{Option 2: Lidar measurements}. With this configuration, the bird emits 180 lidar in front of it and reads their distance to the nearest obstacle. The number of lidar readings used can be specified. To use this state reading technique, you can pass \texttt{use\_liar=True} to the problem class and specify the number of lidars with \texttt{n\_lidar=12} for example.
+\end{itemize}
+
+\subsection{Weight matrix $x$}
+Since the generation of the obstacles (pipes) is stochastic, we are not trying to learn the best sequence of action to avoid crashing. Instead, solutions are searched for over a space of all possible real values of weights of a controller. This controller maps the state of the bird (either simulation features or lidar measurements) to an action (either idle $0$ or flap $1$). In other words, you are learning a weight matrix $x$ that changes how the controller $c$ maps the state $s$ to an action $a$:
+
+\[
+a=c(s) \quad \text{where } c(s)=\text{argmax}(x ^\top s), \quad a \in \{0, 1\}
+\]
+
+The dimensionality of $x$ directly depends on the size of the state vector $s$: $x\in\mathbb{R}^{|s|\times2}$. Therefore, in \textbf{Option 1}, we are searching for a vector of $12*2=24$ values. In \textbf{Option 2}, it directly depends on the number of lidar measurements used. The size of $x$ is called the dimensionality of the problem and is a property that greatly affects its difficulty. You should, in your experiments vary the size of the state vector and observe how the number of observations and dimensionality of the problem affect the quality of solutions found.
+
+\subsection{Objective value}
+In this problem, at each simulation step, a reward measure is computed:
+\begin{itemize}
+    \item $+0.1$: every frame it stays alive
+    \item $+1.0$: successfully passing a pipe
+    \item $-1.0$: dies (also terminates the simulation)
+    \item $-0.5$: touch the top of the screen
+\end{itemize}
+
+The fitness of a weight matrix $x$ is the sum of all the rewards obtained during the simulation. Since our objective is to go as far as possible, the optimisation task can be formalised as:
+\[
+\max_{x\in\mathbb{R}^{|s|\times2}}\sum_{t=0}^Tr_t(a_t,s_t)\quad \text{where }a_t=\text{argmax}(x ^\top s)
+\]
+Where $r_t (a_t, s_t)$ is the reward obtained at time $t$ given a state $s_t$ and an action $a_t$ and $T$, the total number of simulation step.
+
+In this section, you should describe the problem in your own words and formulate research questions. The next sections of this report will detail how you aim to answer these questions and discuss the results you obtained.
+
+\section{Experiments}
+Now that you have described the problem and created some research questions, you should explain how you aim to answer them using the three optimisers you have to implement. Don't forget to vary the parameters of the simulation and of the optimisers.
+
+\section{Results}
+In this section, you should present your results using clear figures and tables. Be sure to discuss the results in sufficient details (don't just repeat what is shown in the figure but try to highlight why you get these results or what we can learn from them).
+
+\section{Impact of dimensionality}
+Search the litterature for at least one paper that investigates the impact of dimensionality on discrete or continuous optimisation. Minor students are encouraged to take the lead in writing this section. Summarize the paper, describe the application, and add any relevant literature to this section, be
+sure to answer at least the following questions about the paper:
+\begin{itemize}
+    \item What was the optimisation problem ?
+    \item How was the performance reported ?
+    \item What is the main research outcome of this study ?
+    \item Give your opinion on their approach. What would you have done differently ?
+    \item How would you improve or complete their work ?
+\end{itemize}
+
+\section{Conclusion}
+Write a \textbf{short} conclusion summarizing the most important findings of this assignment.
+
+\appendix
+\section{Appendix}
+\subsection{Submission, review and grading}\label{sec:submission}
+
+For this assignment, \textbf{you should submit the full report in this template}. Please be sure not to exceed the \textbf{limit of 8 pages} for this report, excluding references.
+
+Submission should be done on Brightspace, and should include your report in PDF format and your code as a Python file.  Make sure that the code is readable: clear variable names, comments, etc. 
+
+\bibliographystyle{splncs04}
+\bibliography{bibliography.bib}
+
+\end{document}
