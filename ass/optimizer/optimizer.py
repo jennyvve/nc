@@ -6,15 +6,18 @@ from typing import List
 from typing import Tuple
 
 Vec = List[int]
+FitnessCallable = Callable[[Vec], int]
 
 
 class Optimizer(ABC):
     def __init__(
-        self, _solution_dimension: int, _fitness_function: Callable[[Vec], int]
+        self,
+        _solution_dimension: int,
     ):
         self.solution_dimension = _solution_dimension
-        self.fitness_function = _fitness_function
 
     @abstractmethod
-    def get_best(self, _xb: Vec, _fb: float) -> Tuple[Vec, float]:
+    def get_best(
+        self, _xb: Vec, _fb: float, _fitness_function: FitnessCallable
+    ) -> Tuple[Vec, float]:
         pass

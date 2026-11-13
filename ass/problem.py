@@ -12,12 +12,18 @@ import flappy_bird_gymnasium
 
 class GymProblem:
     def __init__(
-        self, env_name="FlappyBird-v0", use_lidar=True, n_lidar=12, pipe_gap=100
+        self,
+        env_name="FlappyBird-v0",
+        use_lidar=True,
+        n_lidar=12,
+        pipe_gap=100,
+        reward_limit=300,
     ):
         self.env_name = env_name
         self.pipe_gap = pipe_gap
         self.use_lidar = use_lidar
         self.n_lidar = n_lidar
+        self.reward_limit = reward_limit
 
         self.env = gym.make(self.env_name, use_lidar=self.use_lidar, pipe_gap=pipe_gap)
         original_state_size = self.env.observation_space.shape[0]
@@ -98,7 +104,7 @@ class GymProblem:
 
         return total_reward
 
-    def play_machine(self, x, termination_criteria):
+    def play_machine(self, x):
         self.M = x.reshape(self.state_size, self.n_outputs)
         env = gym.make(
             self.env_name,
@@ -112,7 +118,7 @@ class GymProblem:
         total_reward = 0.0
         terminated = truncated = False
 
-        while total_reward <= termination_criteria and not (terminated or truncated):
+        while total_reward < self.reward_limit and not (terminated or truncated):
             action = np.argmax(self.M.T @ observation)
             observation, reward, terminated, truncated, _ = env.step(action)
 
@@ -131,7 +137,7 @@ class GymProblem:
         )
 
     def show_machine(self, x):
-        return self.play_machine(x, 500)
+        return self.play_machine(x)
 
     def sample(self):
         return np.random.uniform(-1, 1, size=self.n_variables)

@@ -11,9 +11,10 @@ from numpy import full
 
 from . import Optimizer
 from . import Vec
+from . import FitnessCallable
 
 
-class OptimizerDifferentialEvolution(Optimizer):
+class OptimizerDE(Optimizer):
     def __init__(
         self,
         _population_size: int,
@@ -61,11 +62,11 @@ class OptimizerDifferentialEvolution(Optimizer):
                 ]
                 self.offspring[i] += (x2 - x3) * self.scaling_factor
 
-    def selection(self, _xb: Vec, _fb: float) -> Tuple[Vec, float]:
+    def selection(
+        self, _xb: Vec, _fb: float, _fitness_function: FitnessCallable
+    ) -> Tuple[Vec, float]:
         for i in range(self.population_size):
-            if self.fitness_values[i] <= (
-                f := self.fitness_function(self.offspring[i])
-            ):
+            if self.fitness_values[i] <= (f := _fitness_function(self.offspring[i])):
                 self.fitness_values[i] = f
                 self.population[i] = self.offspring[i]
                 if _fb <= f:
@@ -80,7 +81,10 @@ class OptimizerDifferentialEvolution(Optimizer):
                 if not (uniform(0, 1) <= self.crossover_rate or random_j == j):
                     self.offspring[i][j] = self.population[i][j]
 
-    def get_best(self, _xb: Vec, _fb: float) -> Tuple[Vec, float]:
+    def get_best(
+        self, _xb: Vec, _fb: float, _fitness_function: FitnessCallable
+    ) -> Tuple[Vec, float]:
         self.mutate(_xb)
         self.crossover()
-        return self.selection(_xb, _fb)
+        print(self.population)
+        return self.selection(_xb, _fb, _fitness_function)
